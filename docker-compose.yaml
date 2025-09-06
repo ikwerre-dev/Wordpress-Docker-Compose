@@ -1,45 +1,69 @@
-version: '3.9'
-
 services:
-  db:
-    image: mysql:latest
-    restart: always
-    environment:
-      MYSQL_ROOT_PASSWORD: rootpass
-      MYSQL_DATABASE: wordpress
-      MYSQL_USER: wordpress
-      MYSQL_PASSWORD: wordpress
-    volumes:
-      - db_data:/var/lib/mysql
-
   wordpress:
-    image: wordpress:latest
-    restart: always
-    ports:
-      - "8081:80"
-    environment:
-      WORDPRESS_DB_HOST: db:3306
-      WORDPRESS_DB_USER: wordpress
-      WORDPRESS_DB_PASSWORD: wordpress
-      WORDPRESS_DB_NAME: wordpress
+    image: 'wordpress:latest'
     volumes:
-      - wordpress_data:/var/www/html
-    command: >
-      bash -c "echo 'ServerName localhost' >> /etc/apache2/apache2.conf
-      && apache2-foreground"
-
-  phpmyadmin:
-    image: phpmyadmin:latest
-    restart: always
-    ports:
-      - "8082:80"
+      - 'wordpress-files:/var/www/html'
     environment:
-      PMA_HOST: db
-      MYSQL_ROOT_PASSWORD: rootpass
+      - 'SERVICE_FQDN_WORDPRESS=https://wordpresssite.pxxl.pro'
+      - WORDPRESS_DB_HOST=mysql
+      - WORDPRESS_DB_USER=wordpress
+      - WORDPRESS_DB_PASSWORD=a4755e09960014d1852af7ae406066b7
+      - WORDPRESS_DB_NAME=wordpress
+      - COOLIFY_RESOURCE_UUID=3f0686d893ed47cbb6ac34f60a
+      - COOLIFY_CONTAINER_NAME=wordpress-3f0686d893ed47cbb6ac34f60a
+      - 'COOLIFY_URL=https://wordpresssite.pxxl.pro'
+      - COOLIFY_FQDN=wordpresssite.pxxl.pro
     command: >
-      bash -c "echo 'ServerName localhost' >> /etc/apache2/apache2.conf
-      && apache2-foreground"
+      bash -c "echo 'ServerName wordpresssite.pxxl.pro' >> /etc/apache2/apache2.conf &&
+               docker-entrypoint.sh apache2-foreground"
+    depends_on:
+      - mysql
+    deploy:
+      resources:
+        limits:
+          cpus: '0.8'
+          memory: 1g
+        reservations:
+          cpus: '0.4'
+          memory: 512m
+    healthcheck:
+      test:
+        - CMD
+        - curl
+        - '-f'
+        - 'http://127.0.0.1'
+      interval: 2s
+      timeout: 10s
+      retries: 10
+
+  mysql:
+    image: 'mysql:8'
+    volumes:
+      - 'mysql-data:/var/lib/mysql'
+    environment:
+      - MYSQL_ROOT_PASSWORD=5e11b4c28da44aa19b8545ed0861793d
+      - MYSQL_DATABASE=wordpress
+      - MYSQL_USER=wordpress
+      - MYSQL_PASSWORD=a4755e09960014d1852af7ae406066b7
+    deploy:
+      resources:
+        limits:
+          cpus: '0.4'
+          memory: 512m
+        reservations:
+          cpus: '0.2'
+          memory: 256m
+    healthcheck:
+      test:
+        - CMD
+        - mysqladmin
+        - ping
+        - '-h'
+        - 127.0.0.1
+      interval: 5s
+      timeout: 20s
+      retries: 10
 
 volumes:
-  db_data:
-  wordpress_data:
+  wordpress-files:
+  mysql-data:
