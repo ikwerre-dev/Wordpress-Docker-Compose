@@ -36,6 +36,9 @@ services:
     environment:
       PMA_HOST: db
       MYSQL_ROOT_PASSWORD: rootpass
+    command: >
+      bash -c "echo 'ServerName localhost' >> /etc/apache2/apache2.conf
+      && apache2-foreground"
 
 volumes:
   db_data:
