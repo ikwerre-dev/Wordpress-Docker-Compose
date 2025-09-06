@@ -4,15 +4,15 @@ services:
     volumes:
       - 'wordpress-files:/var/www/html'
     environment:
-      - 'SERVICE_FQDN_WORDPRESS=https://wordpresssite.pxxl.pro'
+      - 'SERVICE_FQDN_WORDPRESS=https://testingwordpress14.pxxl.pro'
       - WORDPRESS_DB_HOST=mysql
       - WORDPRESS_DB_USER=wordpress
       - WORDPRESS_DB_PASSWORD=a4755e09960014d1852af7ae406066b7
       - WORDPRESS_DB_NAME=wordpress
       - COOLIFY_RESOURCE_UUID=3f0686d893ed47cbb6ac34f60a
       - COOLIFY_CONTAINER_NAME=wordpress-3f0686d893ed47cbb6ac34f60a
-      - 'COOLIFY_URL=https://wordpresssite.pxxl.pro'
-      - COOLIFY_FQDN=wordpresssite.pxxl.pro
+      - 'COOLIFY_URL=https://testingwordpress14.pxxl.pro'
+      - COOLIFY_FQDN=testingwordpress14.pxxl.pro
     command: >
       bash -c "echo 'ServerName wordpresssite.pxxl.pro' >> /etc/apache2/apache2.conf &&
                docker-entrypoint.sh apache2-foreground"
