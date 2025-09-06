@@ -1,61 +1,40 @@
+version: '3.9'
+
 services:
+  db:
+    image: mysql:8.4
+    command: --default-authentication-plugin=caching_sha2_password
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpass
+      MYSQL_DATABASE: wordpress
+      MYSQL_USER: wordpress
+      MYSQL_PASSWORD: wordpress
+    volumes:
+      - db_data:/var/lib/mysql
+
   wordpress:
-    image: 'wordpress:latest'
-    volumes:
-      - 'wordpress-files:/var/www/html'
+    image: wordpress:php8.2-apache
+    restart: always
+    ports:
+      - "8081:80"
     environment:
-      - SERVICE_FQDN_WORDPRESS=https://testingwordpress14.pxxl.pro
-      - WORDPRESS_DB_HOST=mysql
-      - WORDPRESS_DB_USER=wordpress
-      - WORDPRESS_DB_PASSWORD=ac49144cc95c5d54efa062a82bc04701
-      - WORDPRESS_DB_NAME=wordpress
-      - COOLIFY_RESOURCE_UUID=7309a773ef8a4b54b5752045c1
-      - COOLIFY_CONTAINER_NAME=wordpress-7309a773ef8a4b54b5752045c1
-      - COOLIFY_URL=https://testingwordpress14.pxxl.pro
-      - COOLIFY_FQDN=testingwordpress14.pxxl.pro
-    depends_on:
-      - mysql
-    deploy:
-      resources:
-        limits:
-          cpus: '0.8'
-          memory: 1g
-        reservations:
-          cpus: '0.4'
-          memory: 512m
-    healthcheck:
-      test:
-        - CMD
-        - curl
-        - '-f'
-        - 'http://127.0.0.1'
-      interval: 2s
-      timeout: 10s
-      retries: 10
-  mysql:
-    image: 'mysql:8'
+      WORDPRESS_DB_HOST: db:3306
+      WORDPRESS_DB_USER: wordpress
+      WORDPRESS_DB_PASSWORD: wordpress
+      WORDPRESS_DB_NAME: wordpress
     volumes:
-      - 'mysql-data:/var/lib/mysql'
+      - wordpress_data:/var/www/html
+
+  phpmyadmin:
+    image: phpmyadmin:latest
+    restart: always
+    ports:
+      - "8082:80"
     environment:
-      - MYSQL_ROOT_PASSWORD=148907edb61ad79a4435bb3d598481ba
-      - MYSQL_DATABASE=wordpress
-      - MYSQL_USER=wordpress
-      - MYSQL_PASSWORD=ac49144cc95c5d54efa062a82bc04701
-    deploy:
-      resources:
-        limits:
-          cpus: '0.4'
-          memory: 512m
-        reservations:
-          cpus: '0.2'
-          memory: 256m
-    healthcheck:
-      test:
-        - CMD
-        - mysqladmin
-        - ping
-        - '-h'
-        - 127.0.0.1
-      interval: 5s
-      timeout: 20s
-      retries: 10
+      PMA_HOST: db
+      MYSQL_ROOT_PASSWORD: rootpass
+
+volumes:
+  db_data:
+  wordpress_data:
